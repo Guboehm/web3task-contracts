@@ -13,6 +13,11 @@ abstract contract AccessControl {
     error InvalidRoleId(uint256 roleId);
 
     /**
+     * @dev Emitted when `roleName` is empty.
+     */
+    error InvalidRoleName(string roleName);
+
+    /**
      * @dev Emitted when a new address is added to an `roleId`.
      */
     event AuthorizePersonnel(
@@ -39,6 +44,9 @@ abstract contract AccessControl {
 
     /// @dev Mapping of `interfaceId` and `roleId` to boolean.
     mapping(bytes4 => mapping(uint256 => bool)) private _operators;
+
+    /// @dev Mapping of `roleId` to string.
+    mapping(uint256 => string) private _rolesName;
 
     /**
      * @dev Modifier to check if `msg.sender` is authorized to operate a
@@ -95,7 +103,7 @@ abstract contract AccessControl {
         uint256 _roleId,
         address _authorizedAddress,
         bool _isAuthorized
-    ) public virtual onlyOwner {
+    ) public virtual {
         if (_roleId == 0) {
             revert InvalidRoleId(_roleId);
         }
@@ -120,7 +128,7 @@ abstract contract AccessControl {
         bytes4 _interfaceId,
         uint256 _roleId,
         bool _isAuthorized
-    ) public virtual onlyOwner {
+    ) public virtual {
         if (_roleId == 0) {
             revert InvalidRoleId(_roleId);
         }
@@ -159,5 +167,21 @@ abstract contract AccessControl {
             return true;
         }
         return _operators[_interfaceId][_roleId];
+    }
+
+    function setRoleName(
+        uint256 _roleId,
+        string memory _roleName
+    ) public virtual returns (string memory) {
+        if (bytes(_roleName).length == 0) {
+            revert InvalidRoleName(_roleName);
+        }
+        return _rolesName[_roleId] = _roleName;
+    }
+
+    function getRoleName(
+        uint256 _roleId
+    ) public view virtual returns (string memory) {
+        return _rolesName[_roleId];
     }
 }

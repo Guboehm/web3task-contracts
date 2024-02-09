@@ -44,7 +44,7 @@ abstract contract Web3Task is ERC721, AccessControl, IWeb3Task {
     /**
      * @dev See {IWeb3Task-setMinQuorum}.
      */
-    function setMinQuorum(uint256 _value) public virtual onlyOwner {
+    function setMinQuorum(uint256 _value) public virtual {
         if (_value == 0) {
             revert("Invalid minimum quorum");
         }
@@ -147,12 +147,6 @@ abstract contract Web3Task is ERC721, AccessControl, IWeb3Task {
     {
         Task memory task = getTask(_taskId);
 
-        if (task.assignee != msg.sender) {
-            if (task.creatorRole != _roleId) {
-                revert Unauthorized(msg.sender);
-            }
-        }
-
         if (task.status == Status.Progress) {
             _tasks[_taskId].status = Status.Review;
         } else if (task.status != Status.Review) {
@@ -182,10 +176,6 @@ abstract contract Web3Task is ERC721, AccessControl, IWeb3Task {
 
         if (task.status != Status.Review) {
             revert InvalidStatus(task.status);
-        }
-
-        if (task.creatorRole != _roleId) {
-            revert Unauthorized(msg.sender);
         }
 
         if (_alreadyVoted[_taskId][msg.sender]) {
@@ -229,10 +219,6 @@ abstract contract Web3Task is ERC721, AccessControl, IWeb3Task {
 
         if (task.status == Status.Canceled || task.status == Status.Completed) {
             revert InvalidStatus(task.status);
-        }
-
-        if (task.creatorRole != _roleId) {
-            revert Unauthorized(msg.sender);
         }
 
         _tasks[_taskId].status = Status.Canceled;
